@@ -1,0 +1,245 @@
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
+import java.util.Scanner;
+import java.util.concurrent.atomic.AtomicBoolean;
+
+public class TimedTyping {
+    private List<String> wordBank;
+    private Random random;
+    private Scanner scanner;
+
+    public TimedTyping() {
+        this.wordBank = new ArrayList<>();
+        populateDefaultWordBank();
+        this.random = new Random();
+        this.scanner = new Scanner(System.in);
+    }
+
+    public TimedTyping(List<String> customWordBank) {
+        this.wordBank = new ArrayList<>(customWordBank);
+        this.random = new Random();
+        this.scanner = new Scanner(System.in);
+    }
+
+
+    private void populateDefaultWordBank() {
+        // Basic spell words
+        String[] defaultWords = {
+                "fireball", "icebolt", "lightning", "earthquake",
+                "tornado", "poison", "healing", "shield",
+                "attack", "defend", "slice", "stab"
+        };
+
+        // Add all words to the bank
+        for (String word : defaultWords) {
+            wordBank.add(word);
+        }
+    }
+
+
+    public void addWord(String word) {
+        wordBank.add(word);
+    }
+
+
+    public String getRandomWord() {
+        int index = random.nextInt(wordBank.size());
+        return wordBank.get(index);
+    }
+
+
+    public String getChallenge(int difficulty) {
+        StringBuilder challenge = new StringBuilder();
+
+        // Number of words based on difficulty
+        int wordCount = 1;
+        if (difficulty > 1) {
+            wordCount = Math.min(difficulty, 4); // Cap at 4 words
+        }
+
+        for (int i = 0; i < wordCount; i++) {
+            challenge.append(getRandomWord());
+            if (i < wordCount - 1) {
+                challenge.append(" ");
+            }
+        }
+
+        return challenge.toString();
+    }
+
+
+    public TypingResult processInputWithTimer(String targetText, int timeLimit) {
+        System.out.println("Type this: " + targetText);
+        System.out.println("You have " + timeLimit + " seconds. Press Enter to start.");
+        scanner.nextLine(); // Wait for Enter to start
+
+        // Start timer in a separate thread
+        AtomicBoolean timedOut = new AtomicBoolean(false);
+        Thread timerThread = startTimerThread(timeLimit, timedOut);
+
+        // Prompt for input
+        System.out.print("> ");
+        String userInput = "";
+
+        try {
+            userInput = scanner.nextLine();
+            // If we get here, user completed input before timeout
+            timerThread.interrupt(); // Stop the timer
+        } catch (Exception e) {
+            // This might happen if the thread is interrupted
+            timedOut.set(true);
+        }
+
+        // Check if timed out
+        if (timedOut.get()) {
+            System.out.println("TIME'S UP!");
+            return new TypingResult(0.0, targetText.length(), new ArrayList<>(), "", true);
+        }
+
+        // Calculate accuracy
+        return calculateResult(targetText, userInput);
+    }
+
+
+    private Thread startTimerThread(int seconds, AtomicBoolean timedOut) {
+        Thread timerThread = new Thread(() -> {
+            try {
+                // Just sleep for the full duration
+                Thread.sleep(seconds * 1000);
+
+                // Time's up!
+                timedOut.set(true);
+                System.out.println("\nTIME'S UP!");
+
+                // Try to interrupt the main thread waiting for input
+                Thread.currentThread().interrupt();
+            } catch (InterruptedException e) {
+                // Timer was interrupted, probably because user finished typing
+            }
+        });
+
+        timerThread.start();
+        return timerThread;
+    }
+
+
+    private TypingResult calculateResult(String target, String input) {
+        List<Integer> mistakePositions = new ArrayList<>();
+        int minLength = Math.min(target.length(), input.length());
+
+        // Check character by character
+        for (int i = 0; i < minLength; i++) {
+            if (target.charAt(i) != input.charAt(i)) {
+                mistakePositions.add(i);
+            }
+        }
+
+        // If lengths differ, count extras/missing as mistakes
+        if (target.length() != input.length()) {
+            for (int i = minLength; i < Math.max(target.length(), input.length()); i++) {
+                mistakePositions.add(i);
+            }
+        }
+
+        // Calculate accuracy
+        int mistakes = mistakePositions.size();
+        double accuracy = 0;
+        if (target.length() > 0) {
+            accuracy = 100.0 * (target.length() - mistakes) / target.length();
+            accuracy = Math.max(0, accuracy);
+        }
+
+        return new TypingResult(accuracy, mistakes, mistakePositions, input, false);
+    }
+
+    public TypingResult[] processMultipleRounds(int difficulty, int rounds) {
+        TypingResult[] results = new TypingResult[rounds];
+
+        for (int i = 0; i < rounds; i++) {
+            System.out.println("\n=== Round " + (i + 1) + " of " + rounds + " ===");
+
+            // Generate challenge
+            String challenge = getChallenge(difficulty);
+
+            // Calculate time based on length and difficulty
+            int timeLimit = calculateTimeLimit(challenge, difficulty);
+
+            // Run the challenge
+            results[i] = processInputWithTimer(challenge, timeLimit);
+
+            // Display result
+            System.out.println("Round " + (i + 1) + " Result: " + results[i]);
+
+            // Pause between rounds
+            if (i < rounds - 1) {
+                System.out.println("Press Enter to continue to the next round...");
+                scanner.nextLine();
+            }
+        }
+
+        return results;
+    }
+
+
+    private int calculateTimeLimit(String text, int difficulty) {
+        // Base time: about 1 second per character
+        double baseTime = text.length() * 1.0;
+
+        // Adjust for difficulty (higher difficulty = less time)
+        double adjustedTime = baseTime * (1.0 - ((difficulty - 1) * 0.2));
+
+        // Ensure minimum time
+        return Math.max((int)Math.ceil(adjustedTime), 3);
+    }
+
+    public void close() {
+        scanner.close();
+    }
+
+
+    public static class TypingResult {
+        private double accuracy;
+        private int mistakes;
+        private List<Integer> mistakePositions;
+        private String userInput;
+        private boolean timedOut;
+
+        public TypingResult(double accuracy, int mistakes, List<Integer> mistakePositions,
+                            String userInput, boolean timedOut) {
+            this.accuracy = accuracy;
+            this.mistakes = mistakes;
+            this.mistakePositions = new ArrayList<>(mistakePositions);
+            this.userInput = userInput;
+            this.timedOut = timedOut;
+        }
+
+        public double getAccuracy() {
+            return accuracy;
+        }
+
+        public int getMistakes() {
+            return mistakes;
+        }
+
+        public List<Integer> getMistakePositions() {
+            return new ArrayList<>(mistakePositions);
+        }
+
+        public String getUserInput() {
+            return userInput;
+        }
+
+        public boolean isTimedOut() {
+            return timedOut;
+        }
+
+        @Override
+        public String toString() {
+            if (timedOut) {
+                return "TIMED OUT - Failed to complete in time";
+            }
+            return String.format("Accuracy: %.2f%%", accuracy);
+        }
+    }
+}
