@@ -1,3 +1,5 @@
+package src;
+
 public class DamagePerCharacter {
     private double baseDamagePerChar;
     private double accuracyMultiplier;

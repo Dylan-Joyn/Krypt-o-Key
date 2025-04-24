@@ -1,3 +1,5 @@
+package src;
+
 public class TimedTypingTest {
     public static void main(String[] args) {
         // Create the typing handler and damage calculator
