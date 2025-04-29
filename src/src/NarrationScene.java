@@ -146,10 +146,10 @@ public class NarrationScene extends JPanel {
 
             case 6: // After monster warning
                 if (selectedYes) { // Only give potions if player was confused
-                    dialogueStage = 7; // Skip to potions
+                    dialogueStage = 6; // Skip to potions
                     gotPotions = true;
                 } else {
-                    dialogueStage = 11; // Skip to not confused path
+                    dialogueStage = 10; // Skip to not confused path
                 }
                 advanceDialogue();
                 break;
@@ -222,10 +222,10 @@ public class NarrationScene extends JPanel {
 
         if (selectedYes) {
             // Confused path
-            dialogueStage = 1; // Start explanation
+            dialogueStage = 0; // Start explanation
         } else {
             // Not confused path
-            dialogueStage = 11; // Skip to "straight to the point"
+            dialogueStage = 10; // Skip to "straight to the point"
         }
 
         advanceDialogue();
