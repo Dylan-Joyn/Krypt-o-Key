@@ -11,7 +11,7 @@ public class FontLoader {
     public static void loadFonts() {
         try {
             // Load from resources folder
-            InputStream fontStream = FontLoader.class.getResourceAsStream("/fonts/VT323-Regular.ttf");
+            InputStream fontStream = FontLoader.class.getResourceAsStream("/resources/fonts/VT323-Regular.ttf");
             vt323Font = Font.createFont(Font.TRUETYPE_FONT, fontStream).deriveFont(24f);
 
             // Register the font system-wide
