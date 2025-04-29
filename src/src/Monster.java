@@ -9,6 +9,7 @@ public class Monster {
     private int baseAttack;
     private int difficulty;
     private MonsterType type;
+    private static boolean secretBoss;
     private int expYield;
     private double potionDropChance;
 
@@ -48,6 +49,7 @@ public class Monster {
         this.name = name;
         this.difficulty = Math.max(1, difficulty);
         this.type = determineType(difficulty);
+        this.secretBoss = false;
 
         // Initialize stats based on difficulty
         initializeStats();
@@ -55,15 +57,23 @@ public class Monster {
 
     // Determine monster type based on difficulty
     private MonsterType determineType(int difficulty) {
+        Random rand = new Random();
+        int secretBossChance = 5;
+
         // Every 10th monster is a boss (PURPLE)
-        if (difficulty % 10 == 0 && difficulty > 0) {
+        // Chance to be secret boss
+        if ((difficulty - 2) % 10 == 0 && difficulty > 0) {
+            if(rand.nextInt(100) < secretBossChance) {
+                secretBoss = true;
+                name = "it";
+            }
             return MonsterType.PURPLE;
         }
 
-        // Otherwise determine by difficulty range
-        if (difficulty <= 3) {
+        // Otherwise determine by difficulty range with some degree of randomness
+        if (difficulty <= Player.getYellowThreshold()) {
             return MonsterType.GREEN;
-        } else if (difficulty <= 7) {
+        } else if (difficulty <= Player.getRedThreshold()) {
             return MonsterType.YELLOW;
         } else {
             return MonsterType.RED;
@@ -154,6 +164,8 @@ public class Monster {
     public MonsterType getType() {
         return type;
     }
+
+    public static boolean  isSecretBoss() { return secretBoss; };
 
     public int getExpYield() {
         return expYield;

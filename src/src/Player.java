@@ -1,5 +1,7 @@
 package src;
 
+import java.util.Random;
+
 public class Player {
     private String name;
     private int level;
@@ -9,9 +11,15 @@ public class Player {
     private int maxHealth;
     private int damageMultiplier;
     private int potionCount;
+    private static int yellowThreshold;
+    private static int redThreshold;
 
     // Constructor
     public Player(String name) {
+        Random rand = new Random();
+
+        this.yellowThreshold = rand.nextInt(3) + 4;
+        this.redThreshold = rand.nextInt(3) + 7;
         this.name = name;
         this.level = 1;
         this.experience = 0;
@@ -120,6 +128,10 @@ public class Player {
     public int getPotionCount() {
         return potionCount;
     }
+
+    public static int getYellowThreshold() { return yellowThreshold; }
+
+    public static int getRedThreshold() { return redThreshold; }
 
     @Override
     public String toString() {
