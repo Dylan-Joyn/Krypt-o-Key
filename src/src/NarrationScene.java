@@ -5,6 +5,7 @@ import java.awt.*;
 import java.awt.event.*;
 import java.util.Timer;
 import java.util.TimerTask;
+import javax.swing.JTextField;
 import java.awt.image.BufferedImage;
 
 public class NarrationScene extends JPanel {
@@ -55,6 +56,9 @@ public class NarrationScene extends JPanel {
     private final int spriteY = buttonY - 100;
     private final int inputX = 450;
     private final int inputY = 400;
+    private JTextField nameInputField;
+    private boolean nameEntered = false;
+    private String greeting = "";
 
     public NarrationScene() {
         // Load all assets with error handling
@@ -62,6 +66,14 @@ public class NarrationScene extends JPanel {
         yesButton = loadImage("/resources/assets/yesButton.png");
         noButton = loadImage("/resources/assets/noButton.png");
         inputBox = loadImage("/resources/assets/inputBox.png");
+        nameInputField = new JTextField();
+        nameInputField.setFont(getVT323Font(36f));
+        nameInputField.setBounds(inputX + 50, inputY + 20, 300, 40);
+        nameInputField.setVisible(false);
+        nameInputField.setOpaque(false);
+        nameInputField.setBorder(BorderFactory.createEmptyBorder());
+        nameInputField.setForeground(Color.BLACK);
+        add(nameInputField);
 
         setPreferredSize(new Dimension(1280, 720));
         setOpaque(false);
@@ -156,6 +168,8 @@ public class NarrationScene extends JPanel {
 
             case 11: // Name prompt
                 showInput = true;
+                nameInputField.setVisible(true);
+                nameInputField.requestFocusInWindow();
                 setupInputListener();
                 break;
 
@@ -211,9 +225,27 @@ public class NarrationScene extends JPanel {
         });
     }
 
+    private Font getVT323Font(float size) {
+        try {
+            return Font.createFont(Font.TRUETYPE_FONT,
+                            getClass().getResourceAsStream("/resources/fonts/VT323-Regular.ttf"))
+                    .deriveFont(size);
+        } catch (Exception e) {
+            return new Font("Monospaced", Font.PLAIN, (int)size);
+        }
+    }
+
     private void setupInputListener() {
-        setFocusable(true);
-        requestFocusInWindow();
+        nameInputField.addActionListener(e -> {
+            playerName = nameInputField.getText().trim();
+            if (!playerName.isEmpty()) {
+                greeting = "Nice to meet ya, " + playerName + "!";
+                nameEntered = true;
+                nameInputField.setVisible(false);
+                startFadeOut();
+                repaint();
+            }
+        });
     }
 
     private void handleSelection() {
@@ -249,11 +281,9 @@ public class NarrationScene extends JPanel {
     }
 
     private void transitionToGame() {
-        // Close current window and open game screen
         JFrame topFrame = (JFrame)SwingUtilities.getWindowAncestor(this);
         topFrame.dispose();
 
-        // Create game screen with overlay
         JFrame gameFrame = new JFrame("Fantasy Adventure");
         gameFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
@@ -265,11 +295,8 @@ public class NarrationScene extends JPanel {
         gameFrame.setLocationRelativeTo(null);
         gameFrame.setVisible(true);
 
-        // Show welcome message with player name
-        JOptionPane.showMessageDialog(gameFrame,
-                "Nice to meet ya, " + playerName + "!",
-                "Cin-narrator",
-                JOptionPane.PLAIN_MESSAGE);
+        // Show greeting in game window
+        JOptionPane.showMessageDialog(gameFrame, greeting, "Cin-narrator", JOptionPane.PLAIN_MESSAGE);
     }
 
     @Override
@@ -314,6 +341,11 @@ public class NarrationScene extends JPanel {
                         noX + noButton.getIconWidth()/2 - cinnaSprite.getIconWidth()/2;
                 g2d.drawImage(cinnaSprite.getImage(), spriteX, spriteY, this);
             }
+        }
+
+        if (nameEntered) {
+            g2d.setColor(Color.WHITE);
+            g2d.drawString(greeting, inputX + 50, inputY + 100);
         }
 
         // Draw input box if visible
