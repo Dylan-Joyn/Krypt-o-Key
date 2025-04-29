@@ -12,9 +12,8 @@ public class MonsterGUI {
     private static float currentAlpha = 0f;
     private static final int FADE_DURATION = 1000; // 1 second fade
     private static final int FPS = 60;
+    private static JPanel currentClickArea;
 
-
-    // First frame - welcome in
     public static void welcomeScreen() {
         frame = new JFrame("Game Screen");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -37,23 +36,14 @@ public class MonsterGUI {
             };
             blackOverlay.setOpaque(false);
 
-            // Start game button
-            JPanel clickArea = new JPanel();
-            clickArea.setOpaque(false);
-            clickArea.setBounds(250, 420, 430, 150);
-            clickArea.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-            clickArea.addMouseListener(new MouseAdapter() {
-                @Override
-                public void mouseClicked(MouseEvent e) {
-                    startTransition();
-                }
-            });
+            // Start game button (only on welcome screen)
+            currentClickArea = createWelcomeClickArea();
 
             JLayeredPane layeredPane = new JLayeredPane();
             layeredPane.setLayout(new OverlayLayout(layeredPane));
             layeredPane.add(backgroundLabel, Integer.valueOf(0));
             layeredPane.add(blackOverlay, Integer.valueOf(1));
-            layeredPane.add(clickArea, Integer.valueOf(2));
+            layeredPane.add(currentClickArea, Integer.valueOf(2));
 
             frame.setContentPane(layeredPane);
             frame.setSize(welcomeIcon.getIconWidth(), welcomeIcon.getIconHeight());
@@ -66,8 +56,27 @@ public class MonsterGUI {
         }
     }
 
+    private static JPanel createWelcomeClickArea() {
+        JPanel clickArea = new JPanel();
+        clickArea.setOpaque(false);
+        clickArea.setBounds(250, 420, 430, 150);
+        clickArea.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        clickArea.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                startTransition();
+            }
+        });
+        return clickArea;
+    }
+
     private static void startTransition() {
         frame.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+
+        // Remove the welcome screen click area immediately
+        if (currentClickArea != null) {
+            ((JLayeredPane)frame.getContentPane()).remove(currentClickArea);
+        }
 
         // Fade out timer
         Timer fadeOutTimer = new Timer(FADE_DURATION/FPS, null);
@@ -86,8 +95,7 @@ public class MonsterGUI {
                 if (currentAlpha >= 1.0f) {
                     currentAlpha = 1.0f;
                     fadeOutTimer.stop();
-                    changeBackground();
-                    fadeIn();
+                    transitionToNarrationScene();
                 }
 
                 blackOverlay.repaint();
@@ -96,40 +104,51 @@ public class MonsterGUI {
         fadeOutTimer.start();
     }
 
-    private static void changeBackground() {
-        try {
-            ImageIcon newIcon = new ImageIcon(MonsterGUI.class.getResource("/resources/cinnarration.png"));
-            backgroundLabel.setIcon(newIcon);
-            frame.setSize(newIcon.getIconWidth(), newIcon.getIconHeight());
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
+    private static void transitionToNarrationScene() {
+        // Dispose of the current frame
+        frame.dispose();
 
-    private static void fadeIn() {
-        Timer fadeInTimer = new Timer(FADE_DURATION/FPS, null);
-        fadeInTimer.addActionListener(new ActionListener() {
-            long startTime = -1;
+        // Create and show the NarrationScene with cinnarration background
+        JFrame narrationFrame = new JFrame("Cin-narrator");
+        narrationFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
+        // Load the background image
+        ImageIcon narrationBg = new ImageIcon(MonsterGUI.class.getResource("/resources/cinnarration.png"));
+
+        // Create background panel
+        JPanel backgroundPanel = new JPanel(new BorderLayout()) {
             @Override
-            public void actionPerformed(ActionEvent e) {
-                if (startTime < 0) {
-                    startTime = System.currentTimeMillis();
-                }
-
-                long elapsed = System.currentTimeMillis() - startTime;
-                currentAlpha = 1.0f - ((float)elapsed / FADE_DURATION);
-
-                if (currentAlpha <= 0.0f) {
-                    currentAlpha = 0.0f;
-                    fadeInTimer.stop();
-                    frame.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
-                }
-
-                blackOverlay.repaint();
+            protected void paintComponent(Graphics g) {
+                super.paintComponent(g);
+                g.drawImage(narrationBg.getImage(), 0, 0, getWidth(), getHeight(), this);
             }
-        });
-        fadeInTimer.start();
+        };
+        backgroundPanel.setPreferredSize(
+                new Dimension(narrationBg.getIconWidth(), narrationBg.getIconHeight()));
+
+        // Create the narration scene
+        NarrationScene narrationScene = new NarrationScene();
+        narrationScene.setOpaque(false); // Make transparent to show background
+
+        // Add components to layered pane
+        JLayeredPane layeredPane = new JLayeredPane();
+        layeredPane.setPreferredSize(backgroundPanel.getPreferredSize());
+
+        backgroundPanel.setBounds(0, 0,
+                narrationBg.getIconWidth(), narrationBg.getIconHeight());
+        narrationScene.setBounds(0, 0,
+                narrationBg.getIconWidth(), narrationBg.getIconHeight());
+
+        layeredPane.add(backgroundPanel, JLayeredPane.DEFAULT_LAYER);
+        layeredPane.add(narrationScene, JLayeredPane.PALETTE_LAYER);
+
+        narrationFrame.setContentPane(layeredPane);
+        narrationFrame.pack();
+        narrationFrame.setLocationRelativeTo(null);
+        narrationFrame.setVisible(true);
+
+        // Start with fade-in effect
+        narrationScene.startFadeIn();
     }
 
     public static void main(String[] args) {
