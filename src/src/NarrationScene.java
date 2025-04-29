@@ -32,7 +32,8 @@ public class NarrationScene extends JPanel {
     // Dialogue sequence
     private int dialogueStage = 0;
     private final String[] dialogue = {
-            "Hi there! I'm your family friendly Cin-narrator! You're probably confused, right?",
+            "Hi there! I'm your family friendly Cin-narrator! You're probably confused, right?\n" +
+                    "\n (Use the arrow keys to select between yes and no]",
             "No worries! I'm here to explain our game!",
             "We were supposed to be on our way to CSCI-3381, but we got sidetracked!",
             "Also, I'm really bad at directions so instead of turning left I accidentally warped us into a fantasy land. Whoopsie! :3",
@@ -42,7 +43,7 @@ public class NarrationScene extends JPanel {
             "[You got 2 potions in your inventory now!]",
             "Heyyy... so uhm! Since I gave you something to help you out... what d'ya say you uhhh...",
             "Protect lil ol' me... especially bc my character design makes me too fat and small to protect myself.",
-            "Oh? I'll take your silence as a yes! (*You sweat a little, Cinna didn't even give you a chance to respond??*)",
+            "Oh? I'll take your silence as a yes! \n(*You sweat a little. Cinna didn't even give you a chance to respond??*)",
             "Ah, okay then! Straight to point I see... well then...",
             "What's my new friend's name?"
     };
@@ -66,6 +67,7 @@ public class NarrationScene extends JPanel {
         yesButton = loadImage("/resources/assets/yesButton.png");
         noButton = loadImage("/resources/assets/noButton.png");
         inputBox = loadImage("/resources/assets/inputBox.png");
+        System.out.println("Input box loaded: " + (inputBox.getImageLoadStatus() == MediaTracker.COMPLETE));
         nameInputField = new JTextField();
         nameInputField.setFont(getVT323Font(36f));
         nameInputField.setBounds(inputX + 50, inputY + 20, 300, 40);
@@ -166,7 +168,7 @@ public class NarrationScene extends JPanel {
                 advanceDialogue();
                 break;
 
-            case 11: // Name prompt
+            case 12: // Name prompt
                 showInput = true;
                 nameInputField.setVisible(true);
                 nameInputField.requestFocusInWindow();
@@ -242,6 +244,7 @@ public class NarrationScene extends JPanel {
                 greeting = "Nice to meet ya, " + playerName + "!";
                 nameEntered = true;
                 nameInputField.setVisible(false);
+                showInput = false;
                 startFadeOut();
                 repaint();
             }
@@ -312,14 +315,7 @@ public class NarrationScene extends JPanel {
         }
 
         // Set retro font
-        try {
-            Font vt323 = Font.createFont(Font.TRUETYPE_FONT,
-                            getClass().getResourceAsStream("/resources/fonts/VT323-Regular.ttf"))
-                    .deriveFont(36f);
-            g2d.setFont(vt323);
-        } catch (Exception e) {
-            g2d.setFont(new Font("Monospaced", Font.PLAIN, 36));
-        }
+        g2d.setFont(getVT323Font(36f));
 
         // Draw current dialogue text
         g2d.setColor(Color.WHITE);
@@ -334,7 +330,6 @@ public class NarrationScene extends JPanel {
                 g2d.drawImage(noButton.getImage(), noX, buttonY, this);
             }
 
-            // Draw Cinna sprite over selected button
             if (cinnaSprite.getImage() != null) {
                 int spriteX = selectedYes ?
                         yesX + yesButton.getIconWidth()/2 - cinnaSprite.getIconWidth()/2 :
@@ -343,24 +338,23 @@ public class NarrationScene extends JPanel {
             }
         }
 
-        if (nameEntered) {
-            g2d.setColor(Color.WHITE);
-            g2d.drawString(greeting, inputX + 50, inputY + 100);
-        }
-
         // Draw input box if visible
         if (showInput) {
             if (inputBox.getImage() != null) {
-                g2d.drawImage(inputBox.getImage(), inputX, inputY, this);
+                g2d.drawImage(inputBox.getImage(), inputX, inputY, 400, 100, this);
             }
 
-            // Draw entered name
-            g2d.setColor(Color.BLACK);
-            g2d.drawString(playerName, inputX + 50, inputY + 40);
-
-            // Draw prompt to press Enter
+            // Draw instructions
             g2d.setColor(Color.WHITE);
-            g2d.drawString("Press Enter when done", inputX + 50, inputY + 80);
+            g2d.drawString("Enter your name:", inputX + 50, inputY + 30);
+
+            // Name will be drawn by the JTextField component
+        }
+
+        // Draw greeting if name was entered
+        if (nameEntered) {
+            g2d.setColor(Color.WHITE);
+            g2d.drawString(greeting, inputX + 50, inputY + 150);
         }
     }
 
