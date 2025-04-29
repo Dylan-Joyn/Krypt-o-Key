@@ -96,7 +96,7 @@ public class TimedTyping {
         // Check if timed out
         if (timedOut.get()) {
             System.out.println("TIME'S UP!");
-            return new TypingResult(0.0, targetText.length(), new ArrayList<>(), "", true);
+            return new TypingResult(0.0, "", true);
         }
 
         // Calculate accuracy
@@ -126,33 +126,38 @@ public class TimedTyping {
     }
 
 
+    public static int editDistance(String s1, String s2) {
+        int lenS1 = s1.length();
+        int lenS2 = s2.length();
+        int[][] dp = new int[lenS1 + 1][lenS2 + 1];
+
+        for (int i = 0; i <= lenS1; i++) {
+            dp[i][0] = i;
+        }
+        for (int j = 0; j <= lenS2; j++) {
+            dp[0][j] = j;
+        }
+
+        for (int i = 1; i <= lenS1; i++) {
+            for (int j = 1; j <= lenS2; j++) {
+                if (s1.charAt(i - 1) == s2.charAt(j - 1)) {
+                    dp[i][j] = dp[i - 1][j - 1];
+                } else {
+                    dp[i][j] = Math.min(dp[i - 1][j - 1], Math.min(dp[i - 1][j], dp[i][j - 1])) + 1;
+                }
+            }
+        }
+        return dp[lenS1][lenS2];
+    }
+
+
     private TypingResult calculateResult(String target, String input) {
-        List<Integer> mistakePositions = new ArrayList<>();
-        int minLength = Math.min(target.length(), input.length());
+        int editDistance = editDistance(input, target);
+        int maxPossibleDistance = Math.max(input.length(), target.length());
 
-        // Check character by character
-        for (int i = 0; i < minLength; i++) {
-            if (target.charAt(i) != input.charAt(i)) {
-                mistakePositions.add(i);
-            }
-        }
+        double accuracy = (1 - (double) editDistance / maxPossibleDistance) * 100;
 
-        // If lengths differ, count extras/missing as mistakes
-        if (target.length() != input.length()) {
-            for (int i = minLength; i < Math.max(target.length(), input.length()); i++) {
-                mistakePositions.add(i);
-            }
-        }
-
-        // Calculate accuracy
-        int mistakes = mistakePositions.size();
-        double accuracy = 0;
-        if (target.length() > 0) {
-            accuracy = 100.0 * (target.length() - mistakes) / target.length();
-            accuracy = Math.max(0, accuracy);
-        }
-
-        return new TypingResult(accuracy, mistakes, mistakePositions, input, false);
+        return new TypingResult(accuracy, input, false);
     }
 
     public TypingResult[] processMultipleRounds(int difficulty, int rounds) {
@@ -202,30 +207,17 @@ public class TimedTyping {
 
     public static class TypingResult {
         private double accuracy;
-        private int mistakes;
-        private List<Integer> mistakePositions;
         private String userInput;
         private boolean timedOut;
 
-        public TypingResult(double accuracy, int mistakes, List<Integer> mistakePositions,
-                            String userInput, boolean timedOut) {
+        public TypingResult(double accuracy, String userInput, boolean timedOut) {
             this.accuracy = accuracy;
-            this.mistakes = mistakes;
-            this.mistakePositions = new ArrayList<>(mistakePositions);
             this.userInput = userInput;
             this.timedOut = timedOut;
         }
 
         public double getAccuracy() {
             return accuracy;
-        }
-
-        public int getMistakes() {
-            return mistakes;
-        }
-
-        public List<Integer> getMistakePositions() {
-            return new ArrayList<>(mistakePositions);
         }
 
         public String getUserInput() {
