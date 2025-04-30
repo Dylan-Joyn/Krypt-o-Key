@@ -24,7 +24,7 @@ public class Player {
 
     // Calculate experience needed for next level
     private int calculateExpForNextLevel(int currentLevel) {
-        return 100 * currentLevel * currentLevel;
+        return 20 * currentLevel * currentLevel;
     }
 
     // Add experience and check for level up
