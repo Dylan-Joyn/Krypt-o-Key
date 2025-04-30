@@ -287,19 +287,16 @@ public class NarrationScene extends JPanel {
         JFrame topFrame = (JFrame)SwingUtilities.getWindowAncestor(this);
         topFrame.dispose();
 
-        JFrame gameFrame = new JFrame("Fantasy Adventure");
-        gameFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        // Create GameGUI with the player
+        GameGUI gameGUI = new GameGUI(createPlayer());
+        gameGUI.show();
+    }
 
-        ImageIcon overlay = new ImageIcon(getClass().getResource("/resources/screenOverlay.png"));
-        JLabel overlayLabel = new JLabel(overlay);
-
-        gameFrame.setContentPane(overlayLabel);
-        gameFrame.pack();
-        gameFrame.setLocationRelativeTo(null);
-        gameFrame.setVisible(true);
-
-        // Show greeting in game window
-        JOptionPane.showMessageDialog(gameFrame, greeting, "Cin-narrator", JOptionPane.PLAIN_MESSAGE);
+    private Player createPlayer() {
+        Player player = new Player(playerName);
+        player.addPotion();
+        player.addPotion();
+        return player;
     }
 
     @Override

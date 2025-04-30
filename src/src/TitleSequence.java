@@ -5,7 +5,7 @@ import java.awt.*;
 import java.awt.event.*;
 import javax.swing.Timer;
 
-public class MonsterGUI {
+public class TitleSequence {
     private static JFrame frame;
     private static JPanel blackOverlay;
     private static JLabel backgroundLabel;
@@ -19,7 +19,7 @@ public class MonsterGUI {
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
         try {
-            ImageIcon welcomeIcon = new ImageIcon(MonsterGUI.class.getResource("/resources/welcomeGame.png"));
+            ImageIcon welcomeIcon = new ImageIcon(TitleSequence.class.getResource("/resources/welcomeGame.png"));
             backgroundLabel = new JLabel(welcomeIcon);
 
             // Black overlay for fading
@@ -113,7 +113,7 @@ public class MonsterGUI {
         narrationFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
         // Load the background image
-        ImageIcon narrationBg = new ImageIcon(MonsterGUI.class.getResource("/resources/cinnarration.png"));
+        ImageIcon narrationBg = new ImageIcon(TitleSequence.class.getResource("/resources/cinnarration.png"));
 
         // Create background panel
         JPanel backgroundPanel = new JPanel(new BorderLayout()) {
