@@ -5,95 +5,81 @@ import java.awt.*;
 import java.awt.event.*;
 
 public class GameGUI {
-    // Main components
     private JFrame frame;
     private Player player;
+    private ImageIcon cinnaIcon;
 
-    // Tutorial animation
+    // Tutorial animation variables
     private JLabel tutorialLabel;
-    private String tutorialMessage = "Click the buttons on the upper right to select your next move!";
+    private String tutorialMessage = "Click the areas on the upper right to select your next move!";
     private String displayedTutorial = "";
     private int tutorialCharIndex = 0;
     private Timer tutorialTimer;
 
-    // Button dimensions
-    private static final int BUTTON_WIDTH = 230;
-    private static final int BUTTON_X = 100;
-    private static final int[] BUTTON_Y = {25, 175, 325, 450};
-    private static final int[] BUTTON_HEIGHTS = {75, 45, 85, 90};
-    private static final String[] BUTTON_TEXTS = {"FIGHT", "HEAL", "STATS", "QUIT"};
-
     public GameGUI(Player player) {
         this.player = player;
-        this.frame = new JFrame("Fantasy Adventure");
+        this.cinnaIcon = new ImageIcon(getClass().getResource("/resources/assets/cinnaSprite.png"));
         initialize();
     }
 
     private void initialize() {
+        frame = new JFrame("Fantasy Adventure");
+        frame.setIconImage(cinnaIcon.getImage());
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-
-        // Load background
-        ImageIcon bgIcon = new ImageIcon(getClass().getResource("/resources/screenOverlay.png"));
-        JLabel background = new JLabel(bgIcon);
-        background.setLayout(null);
 
         // Create layered pane
         JLayeredPane layeredPane = new JLayeredPane();
-        layeredPane.setPreferredSize(new Dimension(bgIcon.getIconWidth(), bgIcon.getIconHeight()));
 
-        // Create tutorial text label
-        tutorialLabel = new JLabel();
-        tutorialLabel.setFont(getVT323Font(24f));
-        tutorialLabel.setForeground(Color.WHITE);
-        tutorialLabel.setBounds(200, 630, 800, 40);
-
-        // Create action buttons
-        createActionButtons(layeredPane);
-
-        // Add components
+        // Load background image
+        ImageIcon bgIcon = new ImageIcon(getClass().getResource("/resources/screenOverlay.png"));
+        JLabel background = new JLabel(bgIcon);
         background.setBounds(0, 0, bgIcon.getIconWidth(), bgIcon.getIconHeight());
         layeredPane.add(background, JLayeredPane.DEFAULT_LAYER);
+
+        // Create tutorial label (positioned at y=630)
+        tutorialLabel = new JLabel();
+        tutorialLabel.setFont(getVT323Font(34f));
+        tutorialLabel.setForeground(Color.decode("#345f92"));
+        tutorialLabel.setBounds(130, 650, 1000, 40);
         layeredPane.add(tutorialLabel, JLayeredPane.PALETTE_LAYER);
 
+        // Create transparent clickable areas
+        createClickAreas(layeredPane);
+
         frame.setContentPane(layeredPane);
-        frame.pack();
+        frame.setSize(bgIcon.getIconWidth(), bgIcon.getIconHeight());
         frame.setLocationRelativeTo(null);
 
-        // Start tutorial animation
+        // Start the typing animation
         startTutorialAnimation();
     }
 
-    private void createActionButtons(JLayeredPane layeredPane) {
-        for (int i = 0; i < BUTTON_TEXTS.length; i++) {
-            JButton button = createButton(
-                    BUTTON_TEXTS[i],
-                    BUTTON_X,
-                    BUTTON_Y[i],
-                    BUTTON_WIDTH,
-                    BUTTON_HEIGHTS[i]
-            );
+    private void createClickAreas(JLayeredPane layeredPane) {
+        // Fight area (100-330x, 25-100y)
+        createClickArea(layeredPane, 100, 25, 230, 75, e -> startBattle());
 
-            // Add appropriate action listeners
-            switch (i) {
-                case 0: button.addActionListener(e -> startBattle()); break;
-                case 1: button.addActionListener(e -> usePotion()); break;
-                case 2: button.addActionListener(e -> showStats()); break;
-                case 3: button.addActionListener(e -> quitGame()); break;
-            }
+        // Heal area (100-330x, 175-220y)
+        createClickArea(layeredPane, 100, 175, 230, 45, e -> usePotion());
 
-            layeredPane.add(button, JLayeredPane.PALETTE_LAYER);
-        }
+        // Stats area (100-330x, 325-410y)
+        createClickArea(layeredPane, 100, 325, 230, 85, e -> showStats());
+
+        // Quit area (100-330x, 450-540y)
+        createClickArea(layeredPane, 100, 450, 230, 90, e -> quitGame());
     }
 
-    private JButton createButton(String text, int x, int y, int width, int height) {
-        JButton button = new JButton(text);
-        button.setFont(getVT323Font(20f));
-        button.setForeground(Color.BLACK);
-        button.setBackground(new Color(255, 215, 0));
-        button.setFocusPainted(false);
-        button.setBorder(BorderFactory.createLineBorder(Color.BLACK, 2));
-        button.setBounds(x, y, width, height);
-        return button;
+    private void createClickArea(JLayeredPane parent, int x, int y, int w, int h, ActionListener action) {
+        JPanel area = new JPanel();
+        area.setOpaque(false);
+        area.setBounds(x, y, w, h);
+        area.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        area.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                action.actionPerformed(new ActionEvent(this, ActionEvent.ACTION_PERFORMED, null));
+            }
+        });
+        parent.add(area, JLayeredPane.PALETTE_LAYER);
     }
 
     private void startTutorialAnimation() {
