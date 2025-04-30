@@ -18,8 +18,8 @@ public class Player {
     public Player(String name) {
         Random rand = new Random();
 
-        this.yellowThreshold = rand.nextInt(3) + 4;
-        this.redThreshold = rand.nextInt(3) + 7;
+        this.yellowThreshold = rand.nextInt(3) + 2;
+        this.redThreshold = rand.nextInt(3) + 5;
         this.name = name;
         this.level = 1;
         this.experience = 0;

@@ -111,7 +111,7 @@ public class BattleLogic {
         String challenge = typingHandler.getChallenge(difficulty);
 
         // Calculate time limit based on difficulty
-        int timeLimit = Math.max(challenge.length() / 2, 5);
+        int timeLimit = Math.max(challenge.length() / 3, 3);
 
         // Run the typing challenge
         TimedTyping.TypingResult result = typingHandler.processInputWithTimer(challenge, timeLimit);
@@ -251,3 +251,9 @@ public class BattleLogic {
         }
     }
 }
+
+
+
+
+
+

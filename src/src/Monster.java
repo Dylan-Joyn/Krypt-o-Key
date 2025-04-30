@@ -62,7 +62,7 @@ public class Monster {
 
         // Every 10th monster is a boss (PURPLE)
         // Chance to be secret boss
-        if ((difficulty - 2) % 10 == 0 && difficulty > 0) {
+        if (difficulty % 10 == 0 && difficulty > 0) {
             if(rand.nextInt(100) < secretBossChance) {
                 secretBoss = true;
                 name = "it";

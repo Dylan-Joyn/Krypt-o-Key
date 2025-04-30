@@ -57,7 +57,7 @@ public class TimedTyping {
         // Number of words based on difficulty
         int wordCount = 1;
         if (difficulty > 1) {
-            wordCount = Math.min(difficulty, 4); // Cap at 4 words
+            wordCount = Math.min(difficulty, 5); // Cap at 5 words
         }
 
         for (int i = 0; i < wordCount; i++) {
