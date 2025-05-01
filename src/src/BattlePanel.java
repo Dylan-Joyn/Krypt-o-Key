@@ -50,10 +50,10 @@ public class BattlePanel extends JPanel {
 
         setLayout(new BorderLayout(5, 5));
         setOpaque(false);
-        setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+        setBorder(BorderFactory.createEmptyBorder(10, 40, 10, 10));
 
         setupUI();
-        generateTypingChallenge();
+        //generateTypingChallenge();
     }
 
     /**
@@ -88,7 +88,7 @@ public class BattlePanel extends JPanel {
 
         // Monster name label
         JLabel nameLabel = new JLabel(monster.getType().getDisplayName() + " " + monster.getName());
-        nameLabel.setFont(getPixelFont(20));
+        nameLabel.setFont(getPixelFont(24));
         nameLabel.setHorizontalAlignment(JLabel.CENTER);
 
         // Monster image - use our loader
@@ -121,7 +121,7 @@ public class BattlePanel extends JPanel {
 
         // Player name
         JLabel nameLabel = new JLabel(player.getName());
-        nameLabel.setFont(getPixelFont(16));
+        nameLabel.setFont(getPixelFont(24));
         nameLabel.setHorizontalAlignment(JLabel.CENTER);
 
         // Player level
@@ -158,14 +158,14 @@ public class BattlePanel extends JPanel {
         panel.setOpaque(false);
 
         // Challenge label
-        challengeLabel = new JLabel("Ready to battle!");
-        challengeLabel.setFont(getPixelFont(22));
+        challengeLabel = new JLabel(monster.getName() + ": " + monster.getBattleCry());
+        challengeLabel.setFont(getPixelFont(30));
         challengeLabel.setHorizontalAlignment(JLabel.CENTER);
-        challengeLabel.setBorder(BorderFactory.createEmptyBorder(20, 10, 20, 10));
+        challengeLabel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
         // Timer label
         timerLabel = new JLabel("Time: 0");
-        timerLabel.setFont(getPixelFont(16));
+        timerLabel.setFont(getPixelFont(18));
         timerLabel.setHorizontalAlignment(JLabel.CENTER);
 
         // Typing field
@@ -193,27 +193,26 @@ public class BattlePanel extends JPanel {
         JPanel panel = new JPanel(new GridLayout(1, 3, 10, 0));
         panel.setOpaque(false);
 
+        // Icon for buttons
+        ImageIcon icon = new ImageIcon("resources/assets/battleButton.png");
+
         // Attack button
-        attackButton = new JButton("Attack!");
-        attackButton.setFont(getPixelFont(16));
-        attackButton.addActionListener(e -> submitTyping());
+        attackButton = new JButton(icon);
+        attackButton.setText("Attack!");
+        attackButton.setFont(getPixelFont(18));
+        attackButton.addActionListener(e -> generateTypingChallenge()); //submitTyping());
 
         // Potion button
-        potionButton = new JButton("Use Potion");
-        potionButton.setFont(getPixelFont(16));
+        potionButton = new JButton(icon);
+        potionButton.setText("Use Potion");
+        potionButton.setFont(getPixelFont(18));
         potionButton.addActionListener(e -> usePotion());
 
         // Flee button
-        fleeButton = new JButton("Flee Battle");
-        fleeButton.setFont(getPixelFont(16));
-        fleeButton.addActionListener(e -> {
-            if (JOptionPane.showConfirmDialog(this,
-                    "Are you sure you want to flee from battle?",
-                    "Flee Battle",
-                    JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION) {
-                endBattle(false);
-            }
-        });
+        fleeButton = new JButton(icon);
+        fleeButton.setText("Flee Battle");
+        fleeButton.setFont(getPixelFont(18));
+        fleeButton.addActionListener(e -> fleeBattle());
 
         // Add buttons
         panel.add(attackButton);
@@ -227,16 +226,19 @@ public class BattlePanel extends JPanel {
      * Generate a typing challenge based on monster difficulty
      */
     public void generateTypingChallenge() {
+        // Enable typing field if disabled
+        typingField.setEnabled(true);
+
         // Generate challenge
         typingChallenge = typingHandler.getChallenge(monster.getDifficulty());
-        challengeLabel.setText(typingChallenge);
+        challengeLabel.setText("Enter text:  " + typingChallenge);
 
         // Clear typing field
         typingField.setText("");
         typingField.requestFocusInWindow();
 
-        // Set timer (roughly 1 second per character, minimum 5 seconds)
-        timeRemaining = Math.max(typingChallenge.length() / 2, 5);
+        // Set timer (roughly 1 second per 4 characters, minimum 3 seconds)
+        timeRemaining = Math.max(typingChallenge.length() / 4, 3);
         timerLabel.setText("Time: " + timeRemaining);
 
         // Start timer
@@ -279,15 +281,14 @@ public class BattlePanel extends JPanel {
         // Disable typing field temporarily
         typingField.setEnabled(false);
 
+        // Clear challenge text
+        challengeLabel.setText(". . .");
+
         // Monster attacks after delay
         Timer attackTimer = new Timer(1500, new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 monsterAttack();
-
-                // Re-enable typing field and generate new challenge
-                typingField.setEnabled(true);
-                generateTypingChallenge();
             }
         });
 
@@ -306,6 +307,12 @@ public class BattlePanel extends JPanel {
 
         // Get input
         String userInput = typingField.getText();
+
+        // Disable typing field temporarily
+        typingField.setEnabled(false);
+
+        // Clear challenge text
+        challengeLabel.setText(". . .");
 
         // Calculate accuracy
         double accuracy = calculateAccuracy(userInput, typingChallenge);
@@ -343,12 +350,6 @@ public class BattlePanel extends JPanel {
                 @Override
                 public void actionPerformed(ActionEvent e) {
                     monsterAttack();
-
-                    // Check if player is defeated
-                    if (!player.isDefeated()) {
-                        // Generate new challenge
-                        generateTypingChallenge();
-                    }
                 }
             });
 
@@ -410,9 +411,36 @@ public class BattlePanel extends JPanel {
                 }
             }
         });
+    }
 
-        attackTimer.setRepeats(false);
-        attackTimer.start();
+    /**
+     * Roll to try and flee
+     */
+    private void fleeBattle() {
+        int DC = (int) (((double) player.getExperience() / (player.getExperience() +
+                        player.getHealth())) + player.getLevel() - 0.5) + 7;
+        Timer delay2 = new Timer(1000, e -> monsterAttack());
+        Timer delay = new Timer(1000, new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if (UtilFunc.rollD20(DC)) {
+                    endBattle(false);
+                } else {
+                    showMessage("The " + monster.getName() + " stops you from fleeing!");
+                    delay2.setRepeats(false);
+                    delay2.start();
+                }
+            }
+        });
+
+        if (JOptionPane.showConfirmDialog(this,
+                "Roll to flee? DC is: " + DC + "/20",
+                "Flee Battle",
+                JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION) {
+            showMessage("Rolling to flee...");
+            delay.setRepeats(false);
+            delay.start();
+        }
     }
 
     /**

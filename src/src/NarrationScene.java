@@ -33,7 +33,7 @@ public class NarrationScene extends JPanel {
     private int dialogueStage = 0;
     private final String[] dialogue = {
             "Hi there! I'm your family friendly Cin-narrator! You're probably confused, right?\n" +
-                    "\n (Use the arrow keys to select between yes and no]",
+                    "\n [Use the arrow keys to select between yes and no]",
             "No worries! I'm here to explain our game!",
             "We were supposed to be on our way to CSCI-3381, but we got sidetracked!",
             "Also, I'm really bad at directions so instead of turning left I accidentally warped us into a fantasy land. Whoopsie! :3",
@@ -147,7 +147,7 @@ public class NarrationScene extends JPanel {
                     handleDialogueComplete();
                 }
             }
-        }, 0, 30);
+        }, 0, 25);
     }
 
     private void handleDialogueComplete() {
@@ -245,8 +245,16 @@ public class NarrationScene extends JPanel {
                 nameEntered = true;
                 nameInputField.setVisible(false);
                 showInput = false;
-                startFadeOut();
                 repaint();
+                javax.swing.Timer greetingDelay = new javax.swing.Timer(1000, new ActionListener() {
+                    @Override
+                    public void actionPerformed(ActionEvent e) {
+                        startFadeOut();
+                    }
+                });
+
+                greetingDelay.setRepeats(false);
+                greetingDelay.start();
             }
         });
     }
@@ -343,7 +351,7 @@ public class NarrationScene extends JPanel {
 
             // Draw instructions
             g2d.setColor(Color.WHITE);
-            g2d.drawString("Enter your name:", inputX + 50, inputY + 30);
+            g2d.drawString("Enter your name:", inputX + 50, inputY - 30);
 
             // Name will be drawn by the JTextField component
         }

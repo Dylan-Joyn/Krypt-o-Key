@@ -28,7 +28,7 @@ public class MonsterImageLoader {
                 if (imgURL != null) {
                     System.out.println("Found monster image at: " + path);
                     ImageIcon originalIcon = new ImageIcon(imgURL);
-                    Image scaledImage = originalIcon.getImage().getScaledInstance(150, 150, Image.SCALE_SMOOTH);
+                    Image scaledImage = originalIcon.getImage().getScaledInstance(300, 300, Image.SCALE_SMOOTH);
                     return new ImageIcon(scaledImage);
 
                 }

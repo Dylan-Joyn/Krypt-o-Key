@@ -55,13 +55,15 @@ public class Monster {
 
     // Determine monster type based on difficulty
     private MonsterType determineType(int difficulty) {
+        Random rand = new Random();
+
         // Every 10th monster is a boss (PURPLE)
-        if (difficulty % 10 == 0 && difficulty > 0) {
+        if (difficulty >= 3 && rand.nextInt(10) == 0) {
             return MonsterType.PURPLE;
         }
 
         // Otherwise determine by difficulty range
-        if (difficulty <= 3) {
+        if (difficulty <= 2) {
             return MonsterType.GREEN;
         } else if (difficulty <= 7) {
             return MonsterType.YELLOW;
@@ -157,6 +159,13 @@ public class Monster {
 
     public int getExpYield() {
         return expYield;
+    }
+
+    public String getBattleCry() {
+        Random rand = new Random();
+        String[] cries = {"Grr", "Hehe", "oOoO", "Yo.", "Hola", "DIE", "OwU",
+                "Roar!", "C'mere", ";)", "Oh shit", "Bazinga!"};
+        return cries[rand.nextInt(cries.length)];
     }
 
     @Override

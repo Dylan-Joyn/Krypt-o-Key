@@ -28,43 +28,14 @@ public class UtilFunc {
         return dp[lenS1][lenS2];
     }
 
+    /**
+    * Rolls a D20 against the provided DC
+     */
     public static boolean rollD20(int DC) {
         Random random = new Random();
-        String clrscr = "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n";
-        String die1 = """
-                       .-------.
-                      /   o   /|
-                     /_______/o|
-                     | o     | |
-                     |   o   |o/
-                     |     o |/
-                     '-------'""";
-        String die2 = """
-                    ______
-                   /\\     \\
-                  /o \\  o  \\
-                 /   o\\_____\\
-                 \\o   /o    /
-                  \\ o/  o  /
-                   \\/____o/""";
-
-        for(int i = 0; i < 6; i++) {
-            System.out.println(clrscr);
-            if(i % 2 == 0) {
-                System.out.println(die1);
-            } else {
-                System.out.println(die2);
-            }
-            try {
-                Thread.sleep(300);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-        }
-        System.out.println(clrscr);
 
         int roll = random.nextInt(20) + 1;
-        System.out.println(roll);
+        //System.out.println(roll);
         return roll >= DC;
     }
 

@@ -13,11 +13,10 @@ public class GameGUI {
     // Battle components
     private BattlePanel battlePanel;
     private JPanel mainContentPanel;
-    private JLabel messageLabel;
     private boolean inBattle = false;
 
     // Tutorial animation variables
-    private JLabel tutorialLabel;
+    private JLabel messageLabel;
     private String tutorialMessage = "Click the areas on the upper right to select your next move!";
     private String displayedTutorial = "";
     private int tutorialCharIndex = 0;
@@ -58,21 +57,12 @@ public class GameGUI {
         mainContentPanel.setBounds(430, 25, 780, 520);
         layeredPane.add(mainContentPanel, JLayeredPane.PALETTE_LAYER);
 
-        // Create message label (for the bottom rectangle)
-        messageLabel = new JLabel("Welcome to the game! Click the buttons to play.");
-        messageLabel.setFont(getVT323Font(22f));
-        messageLabel.setForeground(Color.decode("#345f92"));
-        messageLabel.setHorizontalAlignment(JLabel.CENTER);
-        // Position in the bottom rectangle area
-        messageLabel.setBounds(430, 590, 780, 100);
-        layeredPane.add(messageLabel, JLayeredPane.PALETTE_LAYER);
-
         // Create tutorial label
-        tutorialLabel = new JLabel();
-        tutorialLabel.setFont(getVT323Font(34f));
-        tutorialLabel.setForeground(Color.decode("#345f92"));
-        tutorialLabel.setBounds(130, 650, 1000, 40);
-        layeredPane.add(tutorialLabel, JLayeredPane.PALETTE_LAYER);
+        messageLabel = new JLabel();
+        messageLabel.setFont(getVT323Font(38f));
+        messageLabel.setForeground(Color.decode("#345f92"));
+        messageLabel.setBounds(130, 650, 1000, 40);
+        layeredPane.add(messageLabel, JLayeredPane.PALETTE_LAYER);
 
         // Create transparent clickable areas
         createClickAreas(layeredPane);
@@ -91,18 +81,18 @@ public class GameGUI {
             if (!inBattle) startBattle();
         });
 
-        // Heal area (100-330x, 175-220y)
-        createClickArea(layeredPane, 100, 175, 230, 45, e -> {
+        // Heal area (100-330x, 175-250y)
+        createClickArea(layeredPane, 100, 175, 230, 75, e -> {
             if (!inBattle) usePotion();
         });
 
-        // Stats area (100-330x, 325-410y)
-        createClickArea(layeredPane, 100, 325, 230, 85, e -> {
+        // Stats area (100-330x, 325-400y)
+        createClickArea(layeredPane, 100, 325, 230, 75, e -> {
             if (!inBattle) showStats();
         });
 
-        // Quit area (100-330x, 450-540y)
-        createClickArea(layeredPane, 100, 450, 230, 90, e -> {
+        // Quit area (100-330x, 475-550y)
+        createClickArea(layeredPane, 100, 475, 230, 75, e -> {
             if (!inBattle) quitGame();
         });
     }
@@ -122,10 +112,10 @@ public class GameGUI {
     }
 
     private void startTutorialAnimation() {
-        tutorialTimer = new Timer(50, e -> {
+        tutorialTimer = new Timer(20, e -> {
             if (tutorialCharIndex < tutorialMessage.length()) {
                 displayedTutorial = tutorialMessage.substring(0, tutorialCharIndex + 1);
-                tutorialLabel.setText(displayedTutorial);
+                messageLabel.setText(displayedTutorial);
                 tutorialCharIndex++;
             } else {
                 ((Timer)e.getSource()).stop();
@@ -184,7 +174,7 @@ public class GameGUI {
             if (player.isDefeated()) {
                 messageLabel.setText("Game Over! You were defeated!");
             } else {
-                messageLabel.setText("You fled from battle! Click FIGHT to try again!");
+                messageLabel.setText("You fled successfully! Click FIGHT to try again!");
             }
         }
 
