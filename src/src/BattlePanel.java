@@ -232,6 +232,11 @@ public class BattlePanel extends JPanel {
         // Generate challenge
         typingChallenge = typingHandler.getChallenge(monster.getDifficulty());
         challengeLabel.setText("Enter text:  " + typingChallenge);
+        if(typingChallenge.length() >= 30) {
+            challengeLabel.setFont(getPixelFont(24));
+        } else {
+            challengeLabel.setFont(getPixelFont(30));
+        }
 
         // Clear typing field
         typingField.setText("");
@@ -506,12 +511,21 @@ public class BattlePanel extends JPanel {
         // Show defeat message
         showMessage("Defeat! You were defeated by the " + monster.getName() + "!");
 
+        // Calculate total xp for final score
+        int deathScore = 0;
+        for(int i = player.getLevel(); i > 1; i--) {
+            deathScore += i * i * 20;
+        }
+        deathScore += player.getExperience();
+
         // Show defeat message after delay
-        Timer defeatTimer = new Timer(1500, new ActionListener() {
+        int finalDeathScore = deathScore;
+        Timer defeatTimer = new Timer(2000, new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 JOptionPane.showMessageDialog(BattlePanel.this,
-                        "You were defeated by the " + monster.getName() + "!\nGame Over",
+                        "You were defeated by the " + monster.getName() + "!\nGame Over\n\n"
+                        + "Final Score:\n" + finalDeathScore,
                         "Defeat!",
                         JOptionPane.ERROR_MESSAGE);
 

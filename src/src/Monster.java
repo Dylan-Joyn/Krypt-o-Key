@@ -57,13 +57,13 @@ public class Monster {
     private MonsterType determineType(int difficulty) {
         Random rand = new Random();
 
-        // Every 10th monster is a boss (PURPLE)
+        // 10% of monsters once level 3 are a boss (PURPLE)
         if (difficulty >= 3 && rand.nextInt(10) == 0) {
             return MonsterType.PURPLE;
         }
 
         // Otherwise determine by difficulty range
-        if (difficulty <= 2) {
+        if (difficulty <= 3) {
             return MonsterType.GREEN;
         } else if (difficulty <= 7) {
             return MonsterType.YELLOW;

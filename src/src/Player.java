@@ -71,10 +71,9 @@ public class Player {
 
         // Calculate healing (full heal)
         int startHealth = health;
-        health = maxHealth;
-        int healAmount = health - startHealth;
+        health += Math.min(maxHealth - startHealth, 30);
 
-        return healAmount;
+        return health - startHealth;
     }
 
     // Add a potion to inventory

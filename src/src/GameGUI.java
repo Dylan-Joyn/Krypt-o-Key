@@ -173,6 +173,7 @@ public class GameGUI {
         } else {
             if (player.isDefeated()) {
                 messageLabel.setText("Game Over! You were defeated!");
+                System.exit(0);
             } else {
                 messageLabel.setText("You fled successfully! Click FIGHT to try again!");
             }
