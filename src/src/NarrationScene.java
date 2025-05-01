@@ -215,6 +215,7 @@ public class NarrationScene extends JPanel {
                 }
 
                 if (showInput && e.getKeyCode() != KeyEvent.VK_ENTER) {
+                    paintComponent(getGraphics());
                     // Handle name input
                     if (e.getKeyCode() == KeyEvent.VK_BACK_SPACE && playerName.length() > 0) {
                         playerName = playerName.substring(0, playerName.length() - 1);
